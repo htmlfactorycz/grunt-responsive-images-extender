@@ -27,7 +27,7 @@ module.exports = function(grunt) {
     clean: {
       tests: ['tmp']
     },
-
+    /*
     // Configuration to be run (and then tested).
     responsive_images_extender: {
       default_options: {
@@ -46,6 +46,27 @@ module.exports = function(grunt) {
           'tmp/custom_options': ['test/fixtures/testing', 'test/fixtures/123']
         }
       }
+    },
+    */
+
+    // Four example configurations to be run (and then tested)
+    responsive_images_extender: {
+      all: {
+        options: {
+          srcAttribute: "smallest",
+          srcsetAttributeName: "data-srcset",
+          ignore: [
+            "img[srcset]",
+            "img[src^='http']",
+            "img[src^='data:']",
+            "img[data-srcset]",
+          ], //"img[sizes]", "img[srcset]"
+        },
+        files: [{
+          src: ['test/fixtures/testing.html'],
+          dest: 'test/tmp/testing.html'
+        }]
+      },
     },
 
     // Unit tests.
