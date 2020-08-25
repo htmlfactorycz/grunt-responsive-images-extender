@@ -25,7 +25,7 @@ module.exports = function(grunt) {
 
     // Before generating any new files, remove any previously-created files.
     clean: {
-      tests: ['tmp']
+      tests: ['test/testing-processed.html']
     },
     /*
     // Configuration to be run (and then tested).
@@ -55,6 +55,8 @@ module.exports = function(grunt) {
         options: {
           srcAttribute: "smallest",
           srcsetAttributeName: "data-srcset",
+          separator: "@",
+          webp: true,
           ignore: [
             "img[srcset]",
             "img[src^='http']",
@@ -63,8 +65,8 @@ module.exports = function(grunt) {
           ], //"img[sizes]", "img[srcset]"
         },
         files: [{
-          src: ['test/fixtures/testing.html'],
-          dest: 'test/tmp/testing.html'
+          src: ['test/testing.html'],
+          dest: 'test/testing-processed.html'
         }]
       },
     },
