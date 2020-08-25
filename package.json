@@ -35,5 +35,9 @@
   },
   "keywords": [
     "gruntplugin"
-  ]
+  ],
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "image-size": "^0.8.3"
+  }
 }
