@@ -53,8 +53,6 @@ module.exports = function(grunt) {
     responsive_images_extender: {
       all: {
         options: {
-          srcAttribute: "smallest",
-          srcsetAttributeName: "data-srcset",
           separator: "@",
           webp: true,
           ignore: [

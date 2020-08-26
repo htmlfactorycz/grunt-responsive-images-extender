@@ -20,10 +20,9 @@ module.exports = function(grunt) {
   var sizeOf = require('image-size');
 
   var DEFAULT_OPTIONS = {
-    separator: '-',
+    separator: '@',
     baseDir: '',
     ignore: [],
-    srcsetAttributeName: 'srcset',
     webp: false
   };
 
