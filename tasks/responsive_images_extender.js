@@ -1,14 +1,9 @@
 /*
  * grunt-responsive-images-extender
- * https://github.com/smaxtastic/grunt-responsive-images-extender
+ * https://github.com/htmlfactorycz/grunt-responsive-images-extender
  *
- * Copyright (c) 2014 Stephan Max
+ * Copyright (c) 2020 Vitalij Petráš
  * Licensed under the MIT license.
- *
- * Extend HTML image tags with srcset and sizes attributes to leverage native responsive images.
- *
- * @author Stephan Max (http://stephanmax.is)
- * @version 2.0.0
  */
 
 module.exports = function(grunt) {
@@ -89,7 +84,7 @@ module.exports = function(grunt) {
       });
 
       return nearestImageSize[0];
-    }
+    };
 
     var getSmallestImage = function(srcMap) {
       var smallestImage = Object.keys(srcMap).map(function(k) {
@@ -106,7 +101,7 @@ module.exports = function(grunt) {
       var lazyloadThisImage = false;
       var imgSrc = imgElem.attr('src');
 
-      var process = function(imgSrc, filepath){
+      var process = function (imgSrc, filepath) {
         var imagePath = normalizeImagePath(imgSrc, filepath);
         var imageMatches = findMatchingImages(imagePath);
 
@@ -123,7 +118,9 @@ module.exports = function(grunt) {
 
         if (imageMatches.length) {
           lazyloadThisImage = true;
-          if (!picture && options.webp) picture = '<picture>';
+          if (!picture && options.webp) {
+            picture = '<picture>';
+          }
 
           var srcMap = buildSrcMap(imageMatches, imagePath);
           var smallestImage = getSmallestImage(srcMap);
@@ -131,7 +128,7 @@ module.exports = function(grunt) {
           var maxsize = imgElem.attr('maxsize') !== undefined ? imgElem.attr('maxsize') : options.maxsize;
 
           //base64 if smaller or equal to 10
-          if(smallestImage[1] <= 10){
+          if (smallestImage[1] <= 10) {
             smallestImageSrc = 'data:image/' + smallestImageSrc.substr(smallestImageSrc.lastIndexOf('.') + 1) + ';base64,' + Buffer.from(grunt.file.read(imagePath.dir + '/' + smallestImage[0], { encoding: null })).toString('base64');
           }
 
@@ -147,9 +144,9 @@ module.exports = function(grunt) {
             imgElem.attr('src', smallestImageSrc);
           }
         }
-      }
+      };
 
-      if(options.webp){
+      if (options.webp) {
         var splittedSrc = imgSrc.split(".");
         splittedSrc[splittedSrc.length - 1] = 'webp';
         var webpImgSrc = splittedSrc.join('.');
@@ -190,7 +187,7 @@ module.exports = function(grunt) {
           $(this).removeAttr('data-sizes');
         });
       }
-    }
+    };
 
     var parseAndExtendImg = function(filepath) {
       var content = grunt.file.read(filepath);
@@ -201,7 +198,9 @@ module.exports = function(grunt) {
         var imgElem = $(this);
         var hasSrcset = imgElem.attr('data-srcset') !== undefined;
 
-        if (!hasSrcset) processImage(imgElem, filepath, $);
+        if (!hasSrcset) {
+          processImage(imgElem, filepath, $);
+        }
       });
 
       return {content: $.html(), count: imgElems.length};
