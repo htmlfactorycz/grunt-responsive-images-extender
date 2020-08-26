@@ -83,7 +83,7 @@ module.exports = function(grunt) {
         return (Math.abs(curr[1] - maxsize) < Math.abs(prev[1] - maxsize) ? curr : prev);
       });
 
-      return nearestImageSize[0];
+      return imagePath.dir + '/' + nearestImageSize[0];
     };
 
     var getSmallestImage = function(srcMap) {
