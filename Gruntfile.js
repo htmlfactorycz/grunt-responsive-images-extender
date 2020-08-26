@@ -27,27 +27,6 @@ module.exports = function(grunt) {
     clean: {
       tests: ['test/testing-processed.html']
     },
-    /*
-    // Configuration to be run (and then tested).
-    responsive_images_extender: {
-      default_options: {
-        options: {
-        },
-        files: {
-          'tmp/default_options': ['test/fixtures/testing', 'test/fixtures/123']
-        }
-      },
-      custom_options: {
-        options: {
-          separator: ': ',
-          punctuation: ' !!!'
-        },
-        files: {
-          'tmp/custom_options': ['test/fixtures/testing', 'test/fixtures/123']
-        }
-      }
-    },
-    */
 
     // Four example configurations to be run (and then tested)
     responsive_images_extender: {
