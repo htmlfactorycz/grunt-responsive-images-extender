@@ -76,14 +76,14 @@ module.exports = function(grunt) {
       return `(max-width: ${size}px) 100vw, ${size}px`;
     };
 
-    var buildSrc = function (imagePath, imageMatches, maxsize, srcMap) {
+    var buildSrc = function (imagePath, maxsize, srcMap, imgSrc) {
       var nearestImageSize = Object.keys(srcMap).map(function (k) {
         return [k, srcMap[k]];
       }).reduce(function (prev, curr) {
         return (Math.abs(curr[1] - maxsize) < Math.abs(prev[1] - maxsize) ? curr : prev);
       });
 
-      return imagePath.dir + '/' + nearestImageSize[0];
+      return path.posix.join(path.dirname(imgSrc), nearestImageSize[0]);
     };
 
     var getSmallestImage = function(srcMap) {
@@ -140,7 +140,7 @@ module.exports = function(grunt) {
           if ('.webp' !== imagePath.ext) {
             imgElem.attr('data-srcset', buildSrcset(srcMap, imgSrc));
             imgElem.attr('data-sizes', buildSizes(maxsize));
-            imgElem.attr('data-src', buildSrc(imagePath, imageMatches, maxsize, srcMap));
+            imgElem.attr('data-src', buildSrc(imagePath, maxsize, srcMap, imgSrc));
             imgElem.attr('src', smallestImageSrc);
           }
         }
