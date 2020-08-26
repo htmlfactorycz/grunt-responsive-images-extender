@@ -105,6 +105,7 @@ module.exports = function(grunt) {
 
     var processImage = function (imgElem, filepath, $) {
       var picture = null;
+      var lazyloadThisImage = false;
       var imgSrc = imgElem.attr('src');
 
       var process = function(imgSrc, filepath){
@@ -123,7 +124,8 @@ module.exports = function(grunt) {
         }
 
         if (imageMatches.length) {
-          if (!picture) picture = '<picture>';
+          lazyloadThisImage = true;
+          if (!picture && options.webp) picture = '<picture>';
 
           var srcMap = buildSrcMap(imageMatches, imagePath);
           var smallestImage = getSmallestImage(srcMap);
@@ -134,8 +136,11 @@ module.exports = function(grunt) {
             smallestImageSrc = 'data:image/' + smallestImageSrc.substr(smallestImageSrc.lastIndexOf('.') + 1) + ';base64,' + Buffer.from(grunt.file.read(imagePath.dir + '/' + smallestImage[0], { encoding: null })).toString('base64');
           }
 
-          picture += '<source srcset="' + smallestImageSrc + '" data-srcset="' + buildSrcset(srcMap, imgSrc) + '" type="image/' + imagePath.ext.split('.').pop() + '">';
+          if (options.webp) {
+            picture += '<source srcset="' + smallestImageSrc + '" data-srcset="' + buildSrcset(srcMap, imgSrc) + '" type="image/' + imagePath.ext.split('.').pop() + '">';
+          }
 
+          //zmenime nativni obrazek (dats-srcset, smallestImageSrc)
           if ('.webp' !== imagePath.ext) {
             imgElem.attr('data-srcset', buildSrcset(srcMap, imgSrc));
             imgElem.attr('src', smallestImageSrc);
@@ -153,18 +158,23 @@ module.exports = function(grunt) {
 
       process(imgSrc, filepath);
 
+      //pokud mame povoleny format webp a jeho verze dopnime chybejici operace
       if (picture) {
         picture += '</picture>';
         imgElem.after(picture);
 
         var lazyPicture = imgElem.next('picture');
         lazyPicture.append(imgElem);
+        imgElem = lazyPicture;
+      }
 
-        lazyPicture.after('<noscript></noscript>');
-        var noscript = lazyPicture.next('noscript');
+      //pokud obrazek ma srcset udelame z nej lazyimage
+      if (lazyloadThisImage) {
+        imgElem.after('<noscript></noscript>');
+        var noscript = imgElem.next('noscript');
 
-        noscript.append(lazyPicture.clone());
-        lazyPicture.addClass('lazyload');
+        noscript.append(imgElem.clone());
+        imgElem.addClass('lazyload');
 
         noscript.find('source').each(function () {
           $(this).attr('srcset', $(this).attr('data-srcset'));
@@ -176,8 +186,6 @@ module.exports = function(grunt) {
           $(this).removeAttr('data-srcset');
         });
       }
-
-
     }
 
     var parseAndExtendImg = function(filepath) {
