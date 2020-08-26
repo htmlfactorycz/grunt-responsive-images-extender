@@ -23,7 +23,8 @@ module.exports = function(grunt) {
     separator: '@',
     baseDir: '',
     ignore: [],
-    webp: false
+    webp: false,
+    maxsize: 500
   };
 
   grunt.registerMultiTask('responsive_images_extender', 'Extend HTML image tags with srcset and sizes attributes to leverage native responsive images.', function() {
@@ -76,21 +77,19 @@ module.exports = function(grunt) {
       return srcset.join(', ');
     };
 
-    var buildSizes = function(sizeList) {
-      var sizes = [];
+    var buildSizes = function(size) {
+      return `(max-width: ${size}px) 100vw, ${size}px`;
+    };
 
-      sizeList.forEach(function(s) {
-        var actualSize = srcMap[imagePath.name + imagePath.ext] + 'px';
-        var cond = s.cond.replace('%size%', actualSize);
-        var size = s.size.replace('%size%', actualSize);
-
-        sizes.push(
-          cond === 'default' ? size : '(' + cond + ') ' + size
-        );
+    var buildSrc = function (imagePath, imageMatches, maxsize, srcMap) {
+      var nearestImageSize = Object.keys(srcMap).map(function (k) {
+        return [k, srcMap[k]];
+      }).reduce(function (prev, curr) {
+        return (Math.abs(curr[1] - maxsize) < Math.abs(prev[1] - maxsize) ? curr : prev);
       });
 
-      return sizes.join(', ');
-    };
+      return nearestImageSize[0];
+    }
 
     var getSmallestImage = function(srcMap) {
       var smallestImage = Object.keys(srcMap).map(function(k) {
@@ -129,6 +128,7 @@ module.exports = function(grunt) {
           var srcMap = buildSrcMap(imageMatches, imagePath);
           var smallestImage = getSmallestImage(srcMap);
           var smallestImageSrc = path.posix.join(path.dirname(imgSrc), smallestImage[0]);
+          var maxsize = imgElem.attr('maxsize') !== undefined ? imgElem.attr('maxsize') : options.maxsize;
 
           //base64 if smaller or equal to 10
           if(smallestImage[1] <= 10){
@@ -136,12 +136,14 @@ module.exports = function(grunt) {
           }
 
           if (options.webp) {
-            picture += '<source srcset="' + smallestImageSrc + '" data-srcset="' + buildSrcset(srcMap, imgSrc) + '" type="image/' + imagePath.ext.split('.').pop() + '">';
+            picture += '<source srcset="' + smallestImageSrc + '" data-srcset="' + buildSrcset(srcMap, imgSrc) + '" data-sizes="' + buildSizes(maxsize) + '" type="image/' + imagePath.ext.split('.').pop() + '">';
           }
 
           //zmenime nativni obrazek (dats-srcset, smallestImageSrc)
           if ('.webp' !== imagePath.ext) {
             imgElem.attr('data-srcset', buildSrcset(srcMap, imgSrc));
+            imgElem.attr('data-sizes', buildSizes(maxsize));
+            imgElem.attr('data-src', buildSrc(imagePath, imageMatches, maxsize, srcMap));
             imgElem.attr('src', smallestImageSrc);
           }
         }
@@ -156,6 +158,8 @@ module.exports = function(grunt) {
       }
 
       process(imgSrc, filepath);
+
+      imgElem.removeAttr('maxsize');
 
       //pokud mame povoleny format webp a jeho verze dopnime chybejici operace
       if (picture) {
@@ -175,14 +179,15 @@ module.exports = function(grunt) {
         noscript.append(imgElem.clone());
         imgElem.addClass('lazyload');
 
-        noscript.find('source').each(function () {
+        noscript.find('img, source').each(function () {
           $(this).attr('srcset', $(this).attr('data-srcset'));
           $(this).removeAttr('data-srcset');
-        });
 
-        noscript.find('img').each(function () {
-          $(this).attr('srcset', $(this).attr('data-srcset'));
-          $(this).removeAttr('data-srcset');
+          $(this).attr('src', $(this).attr('data-src'));
+          $(this).removeAttr('data-src');
+
+          $(this).attr('sizes', $(this).attr('data-sizes'));
+          $(this).removeAttr('data-sizes');
         });
       }
     }
