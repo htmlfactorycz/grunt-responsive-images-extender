@@ -64,9 +64,11 @@ module.exports = function(grunt) {
       var candidate;
 
       for (var img in srcMap) {
-        candidate = path.posix.join(path.dirname(imgSrc), img);
-        candidate += ' ' + srcMap[img] + 'w';
-        srcset.push(candidate);
+        if(srcMap[img] > 10){
+          candidate = path.posix.join(path.dirname(imgSrc), img);
+          candidate += ' ' + srcMap[img] + 'w';
+          srcset.push(candidate);
+        }
       }
 
       return srcset.join(', ');

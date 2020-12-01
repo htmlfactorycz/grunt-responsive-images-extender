@@ -1,7 +1,7 @@
 {
   "name": "grunt-responsive-lazy-images-extender",
   "description": "The best Grunt plugin ever.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "homepage": "https://github.com/htmlfactorycz/grunt-responsive-images-extender",
   "author": {
     "name": "Vitalij Petráš",
