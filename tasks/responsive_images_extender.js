@@ -42,10 +42,20 @@ module.exports = function(grunt) {
 
     var findMatchingImages = function(path) {
       var files = fs.readdirSync(path.dir);
-      var imageMatch = new RegExp(path.name + '(' + options.separator + '[^' + options.separator + ']*)?' + path.ext + '$');
 
       return files.filter(function(filename) {
-        return imageMatch.test(filename);
+        //ignore if file extension is not what we need
+        if(!filename.endsWith(path.ext)) {
+          return false;
+        }
+
+        //ignore if before separator string is not same as path name
+        if(path.name !== filename.split(options.separator)[0]) {
+          return false;
+        }
+
+        //else return true
+        return true;
       });
     };
 
