@@ -74,11 +74,9 @@ module.exports = function(grunt) {
       var candidate;
 
       for (var img in srcMap) {
-        if(srcMap[img] > 10){
-          candidate = path.posix.join(path.dirname(imgSrc), img);
-          candidate += ' ' + srcMap[img] + 'w';
-          srcset.push(candidate);
-        }
+        candidate = path.posix.join(path.dirname(imgSrc), img);
+        candidate += ' ' + srcMap[img] + 'w';
+        srcset.push(candidate);
       }
 
       return srcset.join(', ');
@@ -98,19 +96,8 @@ module.exports = function(grunt) {
       return path.posix.join(path.dirname(imgSrc), nearestImageSize[0]);
     };
 
-    var getSmallestImage = function(srcMap) {
-      var smallestImage = Object.keys(srcMap).map(function(k) {
-        return [k, srcMap[k]];
-      }).reduce(function(a, b) {
-        return b[1] < a[1] ? b : a;
-      });
-
-      return smallestImage;
-    };
-
     var processImage = function (imgElem, filepath, $) {
       var picture = null;
-      var lazyloadThisImage = false;
       var imgSrc = imgElem.attr('src');
 
       var process = function (imgSrc, filepath) {
@@ -129,31 +116,22 @@ module.exports = function(grunt) {
         }
 
         if (imageMatches.length) {
-          lazyloadThisImage = true;
           if (!picture && options.webp) {
             picture = '<picture>';
           }
 
           var srcMap = buildSrcMap(imageMatches, imagePath);
-          var smallestImage = getSmallestImage(srcMap);
-          var smallestImageSrc = path.posix.join(path.dirname(imgSrc), smallestImage[0]);
           var maxsize = imgElem.attr('maxsize') !== undefined ? imgElem.attr('maxsize') : options.maxsize;
 
-          //base64 if smaller or equal to 10
-          if (smallestImage[1] <= 10) {
-            smallestImageSrc = 'data:image/' + smallestImageSrc.substr(smallestImageSrc.lastIndexOf('.') + 1) + ';base64,' + Buffer.from(grunt.file.read(imagePath.dir + '/' + smallestImage[0], { encoding: null })).toString('base64');
-          }
-
           if (options.webp) {
-            picture += '<source srcset="' + smallestImageSrc + '" data-srcset="' + buildSrcset(srcMap, imgSrc) + '" data-sizes="' + buildSizes(maxsize) + '" type="image/' + imagePath.ext.split('.').pop() + '">';
+            picture += '<source srcset="' + buildSrcset(srcMap, imgSrc) + '" sizes="' + buildSizes(maxsize) + '" type="image/' + imagePath.ext.split('.').pop() + '">';
           }
 
           //zmenime nativni obrazek (dats-srcset, smallestImageSrc)
           if ('.webp' !== imagePath.ext) {
-            imgElem.attr('data-srcset', buildSrcset(srcMap, imgSrc));
-            imgElem.attr('data-sizes', buildSizes(maxsize));
-            imgElem.attr('data-src', buildSrc(imagePath, maxsize, srcMap, imgSrc));
-            imgElem.attr('src', smallestImageSrc);
+            imgElem.attr('srcset', buildSrcset(srcMap, imgSrc));
+            imgElem.attr('sizes', buildSizes(maxsize));
+            imgElem.attr('src', buildSrc(imagePath, maxsize, srcMap, imgSrc));
           }
         }
       };
@@ -178,26 +156,6 @@ module.exports = function(grunt) {
         var lazyPicture = imgElem.next('picture');
         lazyPicture.append(imgElem);
         imgElem = lazyPicture;
-      }
-
-      //pokud obrazek ma srcset udelame z nej lazyimage
-      if (lazyloadThisImage) {
-        imgElem.after('<noscript></noscript>');
-        var noscript = imgElem.next('noscript');
-
-        noscript.append(imgElem.clone());
-        imgElem.addClass('lazyload');
-
-        noscript.find('img, source').each(function () {
-          $(this).attr('srcset', $(this).attr('data-srcset'));
-          $(this).removeAttr('data-srcset');
-
-          $(this).attr('src', $(this).attr('data-src'));
-          $(this).removeAttr('data-src');
-
-          $(this).attr('sizes', $(this).attr('data-sizes'));
-          $(this).removeAttr('data-sizes');
-        });
       }
     };
 
