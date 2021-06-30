@@ -72,11 +72,16 @@ module.exports = function(grunt) {
     var buildSrcset = function(srcMap, imgSrc) {
       var srcset = [];
       var candidate;
+      var usedSizes = [];
 
       for (var img in srcMap) {
-        candidate = path.posix.join(path.dirname(imgSrc), img);
-        candidate += ' ' + srcMap[img] + 'w';
-        srcset.push(candidate);
+        if(usedSizes.includes(srcMap[img]) === false) {
+          usedSizes.push(srcMap[img]);
+
+          candidate = path.posix.join(path.dirname(imgSrc), img);
+          candidate += ' ' + srcMap[img] + 'w';
+          srcset.push(candidate);
+        }
       }
 
       return srcset.join(', ');
